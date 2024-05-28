@@ -11,35 +11,25 @@ model = genai.GenerativeModel("gemini-pro")
 chat = model.start_chat(history=[])
 
 # Function to get Gemini's response
-
-
 def get_gemini_response(question):
     global chat
     response = chat.send_message(question)
     return response.text
 
 # Function to handle user input and display Gemini's response
-
-
-@app.route('/convo', methods=['GET','POST'])
+@app.route('/convo', methods=['GET', 'POST'])
 def initialize():
     if request.method == 'GET':
-
-        print("Gemini LLM Application")
-        print("======================")
-        chat.send_message("""
-                        Act like a paragraph summarizer for news given below
-                        """)
-       
+        chat.send_message("Act like a paragraph summarizer for news given below")
         return "ready"
 
     if request.method == 'POST':
-        user_message = request.json['input_question']
-        print(user_message)
-        response = get_gemini_response(user_message)
-        output = jsonify(response)
-        return output
-
+        user_message = request.json.get('input_question', '')
+        if user_message:
+            response = get_gemini_response(user_message)
+            return jsonify({'response': response})
+        else:
+            return jsonify({'error': 'Invalid input'}), 400
 
 if __name__ == "__main__":
     app.run(debug=True)
